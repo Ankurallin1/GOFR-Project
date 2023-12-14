@@ -2,21 +2,37 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"time"
+    "time"
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+// Define a struct to represent your data model
+type Student struct {
+	ID           string `json:"id,omitempty" bson:"_id,omitempty"`
+	Name         string `json:"name,omitempty" bson:"name,omitempty"`
+	Email        string `json:"email,omitempty" bson:"email,omitempty"`
+	CollegeName  string `json:"collegeName,omitempty" bson:"collegeName,omitempty"`
+	EnrollmentNo string `json:"enrollmentNo,omitempty" bson:"enrollmentNo,omitempty"`
+}
+
 var client *mongo.Client
+
+// Connect to MongoDB
 func init() {
 	// Set up client options
 	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
 
 	// Create a MongoDB client
-	client, err := mongo.NewClient(clientOptions)
+	var err error
+	client, err = mongo.NewClient(clientOptions)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -30,27 +46,69 @@ func init() {
 		log.Fatal(err)
 	}
 
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	fmt.Println("Connected to MongoDB!")
+}
+
+// Function to create a new student
+func createStudent(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var student Student
+	_ = json.NewDecoder(r.Body).Decode(&student)
+	collection := client.Database("testdb").Collection("students")
+	result, err := collection.InsertOne(context.TODO(), student)
+	if err != nil {
+		log.Fatal(err)
+	}
+	json.NewEncoder(w).Encode(result)
+}
+
+// Function to get all students
+func getStudents(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var students []Student
+	collection := client.Database("testdb").Collection("students")
+	cursor, err := collection.Find(context.TODO(), bson.M{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cursor.Close(context.TODO())
+	for cursor.Next(context.TODO()) {
+		var student Student
+		cursor.Decode(&student)
+		students = append(students, student)
+	}
+	json.NewEncoder(w).Encode(students)
+}
+
+// Function to get a single student by ID
+func getStudent(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	id := params["id"]
+	var student Student
+	collection := client.Database("testdb").Collection("students")
+	err := collection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&student)
+	if err != nil {
+		log.Fatal(err)
+	}
+	json.NewEncoder(w).Encode(student)
 }
 
 func main() {
 	r := mux.NewRouter()
-	// Define a handler function
+
+	// Define CRUD endpoints for students
+	r.HandleFunc("/students", getStudents).Methods("GET")
+	r.HandleFunc("/students/{id}", getStudent).Methods("GET")
+	r.HandleFunc("/students", createStudent).Methods("POST")
 	
-	handler := func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, World!")
-	}
-
-	// Register the handler function for the root ("/") route
-	http.HandleFunc("/", handler)
-
-	// Start the server on port 8080
+	// Start the server
 	port := 8080
 	fmt.Printf("Server is listening on port %d...\n", port)
-	err := http.ListenAndServe(fmt.Sprintf(":%d", port), r)
-
-	
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
