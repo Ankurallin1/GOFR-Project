@@ -99,6 +99,54 @@ func getStudent(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(student)
 }
 
+// Function to update a student by ID
+func updateStudent(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	id := params["id"]
+
+	// Convert the ID string to an ObjectID
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var updatedStudent Student
+	_ = json.NewDecoder(r.Body).Decode(&updatedStudent)
+
+	collection := client.Database("testdb").Collection("students")
+	filter := bson.M{"_id": objectID}
+	update := bson.D{{"$set", updatedStudent}}
+	_, err = collection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	json.NewEncoder(w).Encode("Student updated successfully")
+}
+
+// Function to delete a student by ID
+func deleteStudent(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	id := params["id"]
+
+	// Convert the ID string to an ObjectID
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	collection := client.Database("testdb").Collection("students")
+	filter := bson.M{"_id": objectID}
+	_, err = collection.DeleteOne(context.TODO(), filter)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	json.NewEncoder(w).Encode("Student deleted successfully")
+}
+
 func main() {
 	r := mux.NewRouter()
 
@@ -106,7 +154,9 @@ func main() {
 	r.HandleFunc("/students", getStudents).Methods("GET")
 	r.HandleFunc("/students/{id}", getStudent).Methods("GET")
 	r.HandleFunc("/students", createStudent).Methods("POST")
-	
+	r.HandleFunc("/students/{id}", updateStudent).Methods("PUT")
+	r.HandleFunc("/students/{id}", deleteStudent).Methods("DELETE")
+
 	// Start the server
 	port := 8080
 	fmt.Printf("Server is listening on port %d...\n", port)
