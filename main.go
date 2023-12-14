@@ -2,12 +2,10 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
-    "time"
-	"github.com/gorilla/mux"
+	"time"
+	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -55,26 +53,28 @@ func init() {
 }
 
 // Function to create a new student
-func createStudent(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+func createStudent(c *fiber.Ctx) error {
 	var student Student
-	_ = json.NewDecoder(r.Body).Decode(&student)
+	if err := c.BodyParser(&student); err != nil {
+		return err
+	}
+
 	collection := client.Database("testdb").Collection("students")
 	result, err := collection.InsertOne(context.TODO(), student)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	json.NewEncoder(w).Encode(result)
+
+	return c.JSON(result)
 }
 
 // Function to get all students
-func getStudents(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+func getStudents(c *fiber.Ctx) error {
 	var students []Student
 	collection := client.Database("testdb").Collection("students")
 	cursor, err := collection.Find(context.TODO(), bson.M{})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer cursor.Close(context.TODO())
 	for cursor.Next(context.TODO()) {
@@ -82,83 +82,86 @@ func getStudents(w http.ResponseWriter, r *http.Request) {
 		cursor.Decode(&student)
 		students = append(students, student)
 	}
-	json.NewEncoder(w).Encode(students)
+	return c.JSON(students)
 }
 
 // Function to get a single student by ID
-func getStudent(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	params := mux.Vars(r)
-	id := params["id"]
-	var student Student
-	collection := client.Database("testdb").Collection("students")
-	err := collection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&student)
-	if err != nil {
-		log.Fatal(err)
-	}
-	json.NewEncoder(w).Encode(student)
-}
-
-// Function to update a student by ID
-func updateStudent(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	params := mux.Vars(r)
-	id := params["id"]
+func getStudent(c *fiber.Ctx) error {
+	id := c.Params("id")
 
 	// Convert the ID string to an ObjectID
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		log.Fatal(err)
+		return err
+	}
+
+	var student Student
+	collection := client.Database("testdb").Collection("students")
+	err = collection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&student)
+	if err != nil {
+		return err
+	}
+	return c.JSON(student)
+}
+
+// Function to update a student by ID
+func updateStudent(c *fiber.Ctx) error {
+	id := c.Params("id")
+
+	// Convert the ID string to an ObjectID
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
 	}
 
 	var updatedStudent Student
-	_ = json.NewDecoder(r.Body).Decode(&updatedStudent)
+	if err := c.BodyParser(&updatedStudent); err != nil {
+		return err
+	}
 
 	collection := client.Database("testdb").Collection("students")
 	filter := bson.M{"_id": objectID}
 	update := bson.D{{"$set", updatedStudent}}
 	_, err = collection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	json.NewEncoder(w).Encode("Student updated successfully")
+	return c.JSON("Student updated successfully")
 }
 
 // Function to delete a student by ID
-func deleteStudent(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	params := mux.Vars(r)
-	id := params["id"]
+func deleteStudent(c *fiber.Ctx) error {
+	id := c.Params("id")
 
 	// Convert the ID string to an ObjectID
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	collection := client.Database("testdb").Collection("students")
 	filter := bson.M{"_id": objectID}
 	_, err = collection.DeleteOne(context.TODO(), filter)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	json.NewEncoder(w).Encode("Student deleted successfully")
+	return c.JSON("Student deleted successfully")
 }
 
 func main() {
-	r := mux.NewRouter()
+	app := fiber.New()
 
 	// Define CRUD endpoints for students
-	r.HandleFunc("/students", getStudents).Methods("GET")
-	r.HandleFunc("/students/{id}", getStudent).Methods("GET")
-	r.HandleFunc("/students", createStudent).Methods("POST")
-	r.HandleFunc("/students/{id}", updateStudent).Methods("PUT")
-	r.HandleFunc("/students/{id}", deleteStudent).Methods("DELETE")
+	app.Get("/students", getStudents)
+	app.Get("/students/:id", getStudent)
+	app.Post("/students", createStudent)
+	app.Put("/students/:id", updateStudent)
+	app.Delete("/students/:id", deleteStudent)
 
 	// Start the server
 	port := 8080
 	fmt.Printf("Server is listening on port %d...\n", port)
-	log.Fatal(http.ListenAndServe(":8080", r))
+	log.Fatal(app.Listen(fmt.Sprintf(":%d", port)))
 }
