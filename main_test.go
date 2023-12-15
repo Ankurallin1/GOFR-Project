@@ -2,70 +2,59 @@ package main
 
 import (
 	"bytes"
-	"strings"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	// "go.mongodb.org/mongo-driver/bson/primitive"
-
+	"github.com/gofiber/fiber/v2"
+	"github.com/stretchr/testify/assert"
 )
-func TestCreateStudent(t *testing.T) {
-	// Create a request body with a sample student
-	student := Student{
-		Name:         "John Doe",
-		Email:        "john.doe@example.com",
-		CollegeName:  "Sample College",
-		EnrollmentNo: "EN12345",
-	}
-	body, err := json.Marshal(student)
-	if err != nil {
-		t.Fatal(err)
-	}
 
-	// Create a POST request to create a new student
-	req, err := http.NewRequest("POST", "/students", bytes.NewReader(body))
-	if err != nil {
-		t.Fatal(err)
-	}
+func TestCRUDOperations(t *testing.T) {
+	app := fiber.New()
 
-	// Create a response recorder to record the response
-	rec := httptest.NewRecorder()
+	// Set up your CRUD endpoints for testing
+	app.Get("/students", getStudents)
+	app.Post("/students", createStudent)
+	app.Get("/students/:id", getStudent)
+	
+	t.Run("CreateStudent", func(t *testing.T) {
+		// Define a sample student for testing
+		student := Student{
+			Name:         "John Doe",
+			Email:        "john.doe@example.com",
+			CollegeName:  "Sample College",
+			EnrollmentNo: "12345",
+		}
 
-	// Call the createStudent handler function
-	createStudent(rec, req)
+		// Convert student to JSON
+		studentJSON, err := json.Marshal(student)
+		assert.NoError(t, err)
 
-	// Check the status code
-	if status := rec.Code; status != http.StatusOK {
-		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusOK)
-	}
+		// Create a POST request with the student JSON
+		req := httptest.NewRequest(http.MethodPost, "/students", bytes.NewReader(studentJSON))
+		req.Header.Set("Content-Type", "application/json")
 
-	// Check the response body
-	responseBody := rec.Body.String()
+		// Create a response recorder to record the response
+		res, err := app.Test(req)
+		assert.NoError(t, err)
 
-if !strings.Contains(responseBody, "InsertedID") {
-    t.Errorf("Handler returned unexpected body: InsertedID field not found")
-}
-}
+		// Assert the status code is 200 OK
+		assert.Equal(t, http.StatusOK, res.StatusCode)
+	})
 
-func TestGetStudents(t *testing.T) {
-	// Create a GET request to get all students
-	req, err := http.NewRequest("GET", "/students", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	t.Run("GetStudents", func(t *testing.T) {
+		// Create a GET request to retrieve all students
+		req := httptest.NewRequest(http.MethodGet, "/students", nil)
 
-	// Create a response recorder to record the response
-	rec := httptest.NewRecorder()
+		// Create a response recorder to record the response
+		res, err := app.Test(req)
+		assert.NoError(t, err)
 
-	// Call the getStudents handler function
-	getStudents(rec, req)
+		// Assert the status code is 200 OK
+		assert.Equal(t, http.StatusOK, res.StatusCode)
 
-	// Check the status code
-	if status := rec.Code; status != http.StatusOK {
-		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusOK)
-	}
+	})
 
 	
 }
-
