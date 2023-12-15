@@ -66,7 +66,9 @@ The base URL for all endpoints is:
 
 - **Example Response:**
   ```json
-  [    {      "id": "657ad262660b9c2342474c33",      "name": "ankur",      "email": "ankursri@gmail.com",      "collegeName": "JUET",      "enrollmentNo": "201B049"    },    {      "id": "657be72ea13c844c358f83b2",      "name": "John Doe",      "email": "john.doe@example.com",      "collegeName": "Sample College",      "enrollmentNo": "12345"    }  
+  [    {      "id": "657ad262660b9c2342474c33",      "name": "ankur",      "email": "ankursri@gmail.com",      "collegeName": "JUET",      "enrollmentNo": "201B049"    },    {      "id": "657be72ea13c844c358f83b2",      "name": "John Doe",      "email": "john.doe@example.com",      "collegeName": "Sample College",      "enrollmentNo": "12345"    }  ]
+
+![Screenshot (17)](https://github.com/Ankurallin1/GOFR-Project/assets/91478132/c5648829-eb6b-4ca5-9093-9be7d7e58edf)
 
 #### 2. **Get Student by ID**
 
@@ -81,6 +83,8 @@ The base URL for all endpoints is:
 - **Example Response:**
   ```json
   [    {      "id": "657ad262660b9c2342474c33",      "name": "ankur",      "email": "ankursri@gmail.com",      "collegeName": "JUET",      "enrollmentNo": "201B049"    }   ]  
+
+![Screenshot (18)](https://github.com/Ankurallin1/GOFR-Project/assets/91478132/e359be2c-6ee7-40f5-93d0-b7ba02c1387a)
 
 #### 3. **Create a New Student**
 
@@ -97,6 +101,9 @@ The base URL for all endpoints is:
 - **Example Response:**
   ```json
   {      "id": "generated-student-id",      "name": "John Doe",      "email": "john.doe@example.com",      "collegeName": "Sample College",      "enrollmentNo": "12345"    }
+
+
+![Screenshot (19)](https://github.com/Ankurallin1/GOFR-Project/assets/91478132/30226e36-e1a3-40f4-871a-781801ce3e4c)
 
 #### 4. **Update Student by ID**
 
@@ -116,6 +123,9 @@ The base URL for all endpoints is:
   ```json
   "Student updated successfully"
   
+![Screenshot (21)](https://github.com/Ankurallin1/GOFR-Project/assets/91478132/a4a7ed03-7a37-4106-b33c-f21c1cd61316)
+
+ 
 #### 5. **Delete Student by ID**
 
 - **Endpoint:**
@@ -130,7 +140,9 @@ The base URL for all endpoints is:
 - **Example Response:**
   ```json
   "Student deleted successfully"
-  
+
+![Screenshot (20)](https://github.com/Ankurallin1/GOFR-Project/assets/91478132/ced1449e-e7df-4f1c-a9ef-c3ff60c3ab77)
+
 ## Automated Testing
 
 The project includes test cases that can be executed using Go's testing framework.
@@ -154,6 +166,10 @@ The project includes test cases that can be executed using Go's testing framewor
 
   ```bash
   go test
+
+
+<img style="padding-left: 100px;" width="1000" alt="test" src="https://github.com/Ankurallin1/GOFR-Project/assets/91478132/eb66b333-e06b-45cb-ab9f-00174340b2ea">
+
 
 ## Contributing
 
