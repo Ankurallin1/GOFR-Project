@@ -25,6 +25,7 @@ Before you begin, ensure you have the following installed on your machine:
 
    ```bash
    git clone https://github.com/Ankurallin1/GOFR-Project
+   
    cd GOFR-Project
 2. Download Dependencies:
 
@@ -35,10 +36,15 @@ Before you begin, ensure you have the following installed on your machine:
 
     ```bash
    cat go.sum
- 4. Run Project
+4. Run Project
     
     ```bash
     go run main.go
+
+5. Open Server
+    
+    ```bash
+    http://localhost:8080/students
     
 ## API Endpoints
 
