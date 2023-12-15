@@ -8,6 +8,8 @@ and extend to meet your specific needs with the flexibility of Go and Fiber.
 - [Getting Started](#getting-started)
 - [API Endpoints](#api-endpoints)
 - [Automated Testing](#automated-testing)
+- [Sequence Diagram](#sequence-diagram)
+- [UML Diagram](#uml-diagram)
 - [Contributing](#contributing)
 
 
@@ -170,6 +172,12 @@ The project includes test cases that can be executed using Go's testing framewor
 
 <img style="padding-left: 100px;" width="1000" alt="test" src="https://github.com/Ankurallin1/GOFR-Project/assets/91478132/eb66b333-e06b-45cb-ab9f-00174340b2ea">
 
+
+## Sequence Diagram
+<img width="500px" alt="sequence" src="https://github.com/Ankurallin1/GOFR-Project/assets/91478132/1287e4b9-2581-4b49-b7e3-84ec00f39f6f">
+
+## UML Diagram
+<img width="1000px" alt="uml diagram" src="https://github.com/Ankurallin1/GOFR-Project/assets/91478132/03625927-d6ce-404d-997e-a5cd012ebe42">
 
 ## Contributing
 
