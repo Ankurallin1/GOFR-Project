@@ -7,7 +7,7 @@ and extend to meet your specific needs with the flexibility of Go and Fiber.
 - [Prerequisites](#prerequisites)
 - [Getting Started](#getting-started)
 - [API Endpoints](#api-endpoints)
-- [Automated Testing](#testing)
+- [Automated Testing](#automated-testing)
 - [Contributing](#contributing)
 
 
@@ -138,14 +138,14 @@ The project includes test cases that can be executed using Go's testing framewor
 ### Changes Required
 
 - **Change the `id` in below lines of `main_test.go` :**
-  - Line 79 for `UpdateStudent` 
-  ```bash
-  req := httptest.NewRequest(http.MethodPut, "/students/{id}", bytes.NewReader(updatedStudentJSON))
-  
-- Line 79 for `DeleteStudent` 
-  ```bash
-  req := httptest.NewRequest(http.MethodDelete, "/students/{id}", nil)
 
+  - Line 79 for `UpdateStudent` 
+     ```bash
+     req := httptest.NewRequest(http.MethodPut, "/students/{id}", bytes.NewReader(updatedStudentJSON))
+     
+  - Line 91 for `DeleteStudent` 
+     ```bash
+     req := httptest.NewRequest(http.MethodDelete, "/students/{id}", nil)
 
 
 ### Running Tests
